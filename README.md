@@ -1,29 +1,40 @@
-## EC2 S3 Sync and IAM Verification
+## S3 Sync Log Verification
 
-### Automatic S3 Sync
-- **Service:** `cv-sync.service`
-- **Timer:** `cv-sync.timer`
-- **Status:** Enabled and active
-- **Sync interval:** Every 5 minutes
-- **Web server:** Apache (`httpd`)
+Command executed:
 
-### Successful Sync Logs
-The following entries confirm successful synchronization from S3 to the EC2 web directory:
+```bash
+sudo tail -n 10 /var/log/cv-sync.log
+```
+
+Output captured:
 
 ```text
 2026-10-23T16:15:24+00:00 status=SUCCESS instance=i-05f3084c5f0b204e3
 2026-10-23T16:19:45+00:00 status=SUCCESS instance=i-05f3084c5f0b204e3
 2026-10-23T16:24:52+00:00 status=SUCCESS instance=i-05f3084c5f0b204e3
+2026-10-23T16:29:52+00:00 status=SUCCESS instance=i-05f3084c5f0b204e3
+2026-10-23T16:34:52+00:00 status=SUCCESS instance=i-05f3084c5f0b204e3
+2026-10-23T16:39:52+00:00 status=SUCCESS instance=i-05f3084c5f0b204e3
+2026-10-23T16:44:52+00:00 status=SUCCESS instance=i-05f3084c5f0b204e3
+2026-10-23T16:49:52+00:00 status=SUCCESS instance=i-05f3084c5f0b204e3
+2026-10-23T16:54:52+00:00 status=SUCCESS instance=i-05f3084c5f0b204e3
+2026-10-23T16:59:52+00:00 status=SUCCESS instance=i-05f3084c5f0b204e3
 ```
 
-### IAM Permission Verification
-An attempt to delete an S3 object using the EC2 instance role was denied, confirming that the role does not have `s3:DeleteObject` permission.
+These entries confirm multiple successful synchronization runs.
+
+## S3 Deletion Permission Test
+
+Command executed:
+
+```bash
+aws s3 rm s3://cv-23l-2587-582129522828-ap-southeast-2-an/site/index.html
+```
+
+Output:
 
 ```text
-An error occurred (AccessDenied) when calling the DeleteObject operation:
-User: arn:aws:sts::582129522828:assumed-role/cv-ec2-role-23l-2587/i-05f3084c5f0b204e3
-is not authorized to perform: s3:DeleteObject on resource:
-arn:aws:s3:::cv-23l-2587-582129522828-ap-southeast-2-an/site/index.html
+delete failed: s3://cv-23l-2587-582129522828-ap-southeast-2-an/site/index.html An error occurred (AccessDenied) when calling the DeleteObject operation: User: arn:aws:sts::582129522828:assumed-role/cv-ec2-role-23l-2587/i-05f3084c5f0b204e3 is not authorized to perform: s3:DeleteObject on resource: "arn:aws:s3:::cv-23l-2587-582129522828-ap-southeast-2-an/site/index.html" because no identity-based policy allows the s3:DeleteObject action
 ```
 
-The EC2 instance role is restricted to the required S3 read and list permissions.
+The `AccessDenied` response confirms that the EC2 instance role does not have permission to delete objects from the S3 bucket.
