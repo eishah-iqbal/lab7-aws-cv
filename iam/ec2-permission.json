@@ -1,0 +1,24 @@
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::cv-23l-2587-582129522828-ap-southeast-2-an/site/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::cv-23l-2587-582129522828-ap-southeast-2-an",
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "site/",
+            "site/*"
+          ]
+        }
+      }
+    }
+  ]
+}
